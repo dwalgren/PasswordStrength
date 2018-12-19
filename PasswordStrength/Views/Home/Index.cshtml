@@ -1,0 +1,182 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <h2>Password Strength</h2>
+        <p>
+            The client side validation will look for at least one upper case letter, lower case letter,
+            number and special charater. The password must be at least 8 characters long.
+        </p>
+        <form class="form-inline">
+            <div class="form-group">
+                <div class="input-group">
+                    <input class="form-control" type="password" id="strength-password" maxlength="18" placeholder="password" />                    
+                </div>
+            </div>
+            <button class="btn btn-primary" disabled id="strength-submit" type="submit" onclick="javascript:return passwordValidate();" >Submit</button>
+            <button class="btn btn-default" id="strength-count">Length: 0</button>
+            <button class="btn btn-default hidden" id="strength-result">00000</button>
+            <div class="checkbox" style="margin-left: 10px;">
+                <label>
+                    <input type="checkbox" value="require-all" id="strength-require-all"> Require all four character criteria
+                </label>
+            </div>
+
+        </form>
+        <div>
+            <p>&nbsp;</p>
+        </div>
+        <div>
+            <div id="strength-panel-1" class="panel panel-default">
+                <div class="panel-heading">Must contain at least three out of four of the following: <span id="strength-ready-1" style="display: none;">(ready)</span></div>
+                <div class="panel-body">
+                    <span id="asterisk-uc" class="asterisk" style="color:gray;">></span>
+                    <span id="strength-uc">Upper Case Letter</span>
+                    <span style="margin-left:6px;">&nbsp;</span>
+
+                    <span id="asterisk-lc" class="asterisk" style="color:gray;">></span>
+                    <span id="strength-lc">Lower Case Letter</span>
+                    <span style="margin-left:6px;">&nbsp;</span>
+
+                    <span id="asterisk-num" class="asterisk" style="color:gray;">></span>
+                    <span id="strength-num">Number</span>
+                    <span style="margin-left:6px;">&nbsp;</span>
+
+                    <span id="asterisk-sc" class="asterisk" style="color:gray;">></span>
+                    <span id="strength-sc">Special Character</span>
+                    <span style="margin-left:6px;">&nbsp;</span>
+                </div>
+            </div>
+            <div id="strength-panel-2" class="panel panel-default">
+                <div class="panel-heading">Password Length <span id="strength-ready-2" style="display: none;">(ready)</span></div>
+                <div class="panel-body">
+                    <span id="strength-len">Needs to be between 8 and 18 characters.</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+
+            </div>
+        </div>
+<script src="../../Scripts/jquery-1.10.2.js" type="text/javascript"></script>
+<script language="javascript">
+    var result = "";
+    $(document).ready(function () {
+        $('#strength-password').keyup(function () {
+            $('#strength-result').html(passwordStrength($('#strength-password').val()));
+            result = $('#strength-result').html();
+
+            if (passwordContains3of4Flags(result.substring(0, 4))) {
+                $('#strength-submit').prop('disabled', false);
+                $('#strength-panel-1').removeClass("panel-default").addClass("panel-success");
+                $('#strength-ready-1').attr({ 'style': 'display:inline;' });
+            }
+            else {
+                $('#strength-submit').prop('disabled', true);
+                $('#strength-panel-1').removeClass("panel-success").addClass("panel-default");
+                $('#strength-ready-1').attr({ 'style': 'display:none;' });
+            }
+
+            if (result.charAt(0) == "1") {
+                $('#strength-uc').attr({ 'style': 'color:green;font-weight:bold;' });
+                $('#asterisk-uc').attr({ 'style': 'color:green;font-weight:bold;' }).text("»");
+            }
+            else {
+                $('#strength-uc').attr({ 'style': 'color:gray;font-weight:normal;' });
+                $('#asterisk-uc').attr({ 'style': 'color:gray;font-weight:normal;' }).text(">");
+            }
+            if (result.charAt(1) == "1") {
+                $('#strength-lc').attr({ 'style': 'color:green;font-weight:bold;' });
+                $('#asterisk-lc').attr({ 'style': 'color:green;font-weight:bold;' }).text("»");
+            }
+            else {
+                $('#strength-lc').attr({ 'style': 'color:gray;font-weight:normal;' });
+                $('#asterisk-lc').attr({ 'style': 'color:gray;font-weight:normal;' }).text(">");
+            }
+            if (result.charAt(2) == "1") {
+                $('#strength-num').attr({ 'style': 'color:green;font-weight:bold;' });
+                $('#asterisk-num').attr({ 'style': 'color:green;font-weight:bold;' }).text("»");
+            }
+            else {
+                $('#strength-num').attr({ 'style': 'color:gray;font-weight:normal;' });
+                $('#asterisk-num').attr({ 'style': 'color:gray;font-weight:normal;' }).text(">");
+            }
+            if (result.charAt(3) == "1") {
+                $('#strength-sc').attr({ 'style': 'color:green;font-weight:bold;' });
+                $('#asterisk-sc').attr({ 'style': 'color:green;font-weight:bold;' }).text("»");
+            }
+            else {
+                $('#strength-sc').attr({ 'style': 'color:gray;font-weight:normal;' });
+                $('#asterisk-sc').attr({ 'style': 'color:gray;font-weight:normal;' }).text(">");
+            }
+            if (result.charAt(4) == "1") {
+                $('#strength-len').attr({ 'style': 'color:green;font-weight:bold;' });
+            }
+            else {
+                $('#strength-len').attr({ 'style': 'color:gray;font-weight:normal;' });
+            }
+            $('#strength-count').html('Length: ' + $('#strength-password').val().length.toString());
+        })
+    })
+    function passwordValidate() {
+        //if (result == "11111") {
+        // This test is for needing only three of the first four conditions (uc, lc, # and special char)
+        if (passwordContains3of4Flags(result.substring(0,4))) {
+            alert("Password is strong enough");
+            return true;
+        }
+        else {
+            alert("Password is not strong enough.");
+            return false;
+        }
+    }
+    function passwordContains3of4Flags(val)
+    {
+        var zerosremoved = val.replace("0", "");
+        if ($('#strength-require-all').prop('checked')) {
+            if (zerosremoved == "1111")
+                return true;
+            else
+                return false;
+        }
+        else {
+            if (zerosremoved == "111" || zerosremoved == "1111")
+                return true;
+            else
+                return false;
+        }
+    }
+    function passwordStrength(val) {
+        // Pattern 00000 - 11111 flags - Upper, Lower, Number, Special Character, At least 8 characters
+        var strength = "";
+        if (/[A-Z]/.test(val)) // Upper case
+            strength += "1";
+        else
+            strength += "0";
+        if (/[a-z]/.test(val)) // Lower case
+            strength += "1";
+        else
+            strength += "0";
+        if (/[0-9]/.test(val)) // Number
+            strength += "1";
+        else
+            strength += "0";
+        var regex = /[ !@@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g;        
+        if (regex.test(val)) // Special Character
+            strength += "1";
+        else
+            strength += "0";
+        if (val.length > 7) { // Length at least 8
+            strength += "1";
+            $('#strength-panel-2').removeClass("panel-default").addClass("panel-success");
+            $('#strength-ready-2').attr({ 'style': 'display:inline;' });
+        }
+        else {
+            strength += "0";
+            $('#strength-panel-2').removeClass("panel-success").addClass("panel-default");
+            $('#strength-ready-2').attr({ 'style': 'display:none;' });
+        }
+        return strength;
+    }
+</script>
